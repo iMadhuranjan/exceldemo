@@ -16,38 +16,31 @@ export default function Spreadsheet() {
   const columnWidths = useSelector((state) => state.spreadsheet.columnWidths);
   const fileInputRef = useRef(null);
 
-  // filterValues holds, for each column, the set of allowed values.
-  // When a user manually chooses filter options (e.g. selects only “10”),
-  // that column’s flag in filterCustomized is set to true.
+
   const [filterValues, setFilterValues] = useState(() =>
     data[0].map(
       (_, colIndex) =>
         new Set(Array.from(new Set(data.slice(1).map((row) => row[colIndex]))))
     )
   );
-  // When false, the column is unfiltered (auto–updated).
-  // When true, the column is manually filtered.
+
   const [filterCustomized, setFilterCustomized] = useState(() =>
     new Array(data[0].length).fill(false)
   );
-  // Controls whether each column’s filter dropdown is open.
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(() =>
     new Array(data[0].length).fill(false)
   );
 
-  // Compute distinct available options for each column from current data.
   const distinctValuesByCol = data[0].map((_, colIndex) =>
     Array.from(new Set(data.slice(1).map((row) => row[colIndex]))).sort()
   );
 
-  // When data (or number of columns) changes, update states.
-  // Note: We removed filterCustomized from the dependency array to prevent infinite updates.
   useEffect(() => {
     setFilterValues((prev) => {
       let newSel = [...prev];
       for (let i = 0; i < data[0].length; i++) {
         if (i >= newSel.length) {
-          newSel[i] = new Set(); // New column gets an empty set (or could be initialized as desired)
+          newSel[i] = new Set(); 
         }
       }
       return newSel.slice(0, data[0].length);
@@ -64,14 +57,12 @@ export default function Spreadsheet() {
     });
   }, [data]);
 
-  // Toggle filter dropdown open/close for a column.
   const toggleFilterDropdown = (colIndex) => {
     setFilterDropdownOpen((prev) =>
       prev.map((val, i) => (i === colIndex ? !val : false))
     );
   };
 
-  // When a user toggles a checkbox for a column:
   const toggleFilterValue = (colIndex, value) => {
     setFilterCustomized((prev) => {
       const newCustomized = [...prev];
@@ -93,7 +84,6 @@ export default function Spreadsheet() {
     });
   };
 
-  // Select or unselect all values for a given column.
   const selectAllValuesForColumn = (colIndex, selectAll) => {
     setFilterCustomized((prev) => {
       const newCustomized = [...prev];
@@ -109,8 +99,7 @@ export default function Spreadsheet() {
     });
   };
 
-  // Update a cell’s value.
-  // If the column is unfiltered (not customized), auto-update the filter options.
+
   const handleCellChange = (rowIndex, colIndex, e) => {
     const newValue = e.target.value;
     dispatch(updateCell({ rowIndex, colIndex, value: newValue }));
@@ -129,7 +118,6 @@ export default function Spreadsheet() {
 
   const handleAddRow = () => {
     dispatch(addRow());
-    // For each unfiltered column, add the new (empty) value.
     setFilterValues((prev) => {
       const newFilters = [...prev];
       newFilters.forEach((filterSet, colIndex) => {
@@ -167,7 +155,6 @@ export default function Spreadsheet() {
     reader.readAsBinaryString(file);
   };
 
-  // Column resizing handler.
   const handleMouseDown = (e, colIndex) => {
     e.stopPropagation();
     const startX = e.clientX;
@@ -186,7 +173,6 @@ export default function Spreadsheet() {
     document.addEventListener("mouseup", onMouseUp);
   };
 
-  // Compute row indices that pass the filter.
   const filteredRowIndices = [];
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
@@ -206,7 +192,6 @@ export default function Spreadsheet() {
 
   return (
     <div className="h-screen p-4">
-      {/* ACTION BUTTONS */}
       <div className="mb-4 flex gap-2">
         <button
           onClick={handleAddRow}
@@ -229,7 +214,6 @@ export default function Spreadsheet() {
         />
       </div>
 
-      {/* SCROLLABLE CONTAINER */}
       <div className="border h-[80vh] border-gray-300 shadow-md rounded-md w-full overflow-x-auto overflow-y-auto">
         <table
           className="border-collapse table-fixed text-sm"
